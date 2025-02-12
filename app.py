@@ -4,6 +4,9 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import os
 
+# Set page title and favicon
+st.set_page_config(page_title="Reconciliation Tool")
+
 # Streamlit app title
 st.title("Reconciliation Report Generator")
 
