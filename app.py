@@ -4,9 +4,6 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 import os
 
-# Set page title and favicon
-st.set_page_config(page_title="Reconciliation Tool")
-
 # Streamlit app title
 st.title("Reconciliation Report Generator")
 
@@ -145,21 +142,24 @@ if report_type == "GST Reconciliation":
         reconciliation_df_b2b["Status"] = reconciliation_df_b2b.apply(get_status, axis=1)
         reconciliation_df_cdnr["Status"] = reconciliation_df_cdnr.apply(get_status, axis=1)
 
+        # Remove rows where "Invoice_No" is "invoice number" and status is "Missing in Tally"
+        reconciliation_df_b2b = reconciliation_df_b2b[~((reconciliation_df_b2b["Invoice_No"].str.lower() == "invoice number") & (reconciliation_df_b2b["Status"] == "Missing in Tally"))]
+        
         # Drop merge indicator column
         reconciliation_df_b2b.drop(columns=["_merge"], inplace=True)
         reconciliation_df_cdnr.drop(columns=["_merge"], inplace=True)
 
         # Select only required columns
         output_df_b2b = reconciliation_df_b2b[[
-            "GSTIN", "Supplier_Invoice_No", "Invoice_No", "Invoice_Value", "Gross_Total",
-            "Taxable_Value", "Total_Expense", "IGST", "Integrated_Tax",
-            "CGST", "Central_Tax", "SGST", "State_UT_Tax", "Status"
+            "GSTIN", "Supplier_Invoice_No", "Gross_Total",
+             "Total_Expense", "IGST", "CGST",  "SGST", "Invoice_No",
+             "Invoice_Value","Taxable_Value","Integrated_Tax","Central_Tax","State_UT_Tax", "Status"
         ]]
 
         output_df_cdnr = reconciliation_df_cdnr[[
-            "GSTIN", "Supplier_Invoice_No", "Invoice_No", "Invoice_Value", "Gross_Total",
-            "Taxable_Value", "Total_Expense", "IGST", "Integrated_Tax",
-            "CGST", "Central_Tax", "SGST", "State_UT_Tax", "Status"
+            "GSTIN", "Supplier_Invoice_No", "Gross_Total",
+             "Total_Expense", "IGST", "CGST",  "SGST", "Invoice_No",
+             "Invoice_Value","Taxable_Value","Integrated_Tax","Central_Tax","State_UT_Tax", "Status"
         ]]
 
         # Combine both DataFrames into one for GSTR-2B + CDNR (Debit Note)
@@ -289,9 +289,10 @@ elif report_type == "Debit Note Reconciliation":
 
         # Select only required columns
         output_df = reconciliation_df[[ 
-            "GSTIN", "Supplier_Invoice_No", "Invoice_Number", "Invoice_Value", "Gross_Total",
-            "Taxable_Value", "Total_Expense", "IGST", "Integrated_Tax",
-            "CGST", "Central_Tax", "SGST", "State_UT_Tax", "Status"
+            "GSTIN", "Supplier_Invoice_No",  "Gross_Total",
+             "Total_Expense", "IGST",
+            "CGST",  "SGST", "Invoice_Number", "Invoice_Value","Taxable_Value", 
+            "Integrated_Tax","Central_Tax","State_UT_Tax", "Status"
         ]]
 
         # Save the report
